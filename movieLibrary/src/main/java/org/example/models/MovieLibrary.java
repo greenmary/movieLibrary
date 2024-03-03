@@ -1,12 +1,17 @@
 package org.example.models;
 
+import org.example.handlers.RandomDataProvider;
+import org.example.handlers.UserInputHandlers;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class MovieLibrary {
-    private List<Movie> movies;
+    private static List<Movie> movies;
 
-    public List<Movie> getMovies() {
+    public static List<Movie> getMovies() {
         return movies;
     }
 
@@ -44,5 +49,35 @@ public class MovieLibrary {
         movies.add(new Movie("Forest Gump",g_Verbinski, List.of(o_Reed, h_Keitel)));
 
 
+    }
+
+    public void getRandomMovieInformation() {
+        System.out.println(movies.get(RandomDataProvider.getRandomIndex()));
+    }
+
+    public void getFilmsForActor() {
+        Actor actor = UserInputHandlers.getActorFromUser();
+        List<String> actorFilmographyList = getActorFilmographyList(actor);
+        if (actorFilmographyList.isEmpty()) {
+            System.out.println(actor + " didn't play in any movie from library.");
+        } else {
+            System.out.println("Actor " + actor + " have played in movies:");
+            String separator = "";
+
+            for (String movie : actorFilmographyList) {
+                System.out.print(separator + movie);
+                separator = ", ";
+            }
+        }
+    }
+    private List<String> getActorFilmographyList(Actor actorToFind) {
+        Predicate<Movie> movieCheck = movie -> movie.getActors().stream()
+                .anyMatch(actor -> actor.getFirstName().equals(actorToFind.getFirstName()) &&
+                        actor.getLastName().equals(actorToFind.getLastName()));
+
+        return movies.stream()
+                .filter(movieCheck)
+                .map(Movie::getTitle)
+                .collect(Collectors.toList());
     }
 }
